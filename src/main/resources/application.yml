@@ -1,0 +1,20 @@
+
+# Reglage serveur
+server:
+  port: 1234
+# nom appli
+spring:
+  application:
+    name: gestionCours
+  # Configuration BD
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: root
+      database: mongoDB
+      port: 27017
+      host: localhost
+      uri: mongodb://root:root@localhost:27017/mongoDB
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
