@@ -6,6 +6,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 /**
  *
@@ -28,23 +30,27 @@ public class Cours {
     public String idEnseignant;
 
     @ManyToOne
-    public Long enseignant;
+    public long enseignant;
 
     @NotNull
     public String lieu;
 
     @NotNull
-    public String creneau;
+    public DateTimeFormatter creneau;
 
     @NotNull
+    //durée exprimée en minutes
     public int duree;
 
     public int nbPlacesOccupees;
 
+    //liste des membres participant au cours
+    public ArrayList<Membre> listeMembres;
+
     public Cours() {
     }
 
-    public Cours(@NotNull String nomCours, @NotNull int niveauCible, @NotNull String idEnseignant, Long enseignant, @NotNull String lieu, @NotNull String creneau, @NotNull int duree) {
+    public Cours(@NotNull String nomCours, @NotNull int niveauCible, @NotNull String idEnseignant, Long enseignant, @NotNull String lieu, @NotNull DateTimeFormatter creneau, @NotNull int duree) {
         this.nomCours = nomCours;
         this.niveauCible = niveauCible;
         this.idEnseignant = idEnseignant;
@@ -53,6 +59,7 @@ public class Cours {
         this.creneau = creneau;
         this.duree = duree;
         this.nbPlacesOccupees=0;
+        this.listeMembres=new ArrayList<Membre>();
     }
 
     public long getId() {
@@ -95,11 +102,11 @@ public class Cours {
         this.lieu = lieu;
     }
 
-    public String getCreneau() {
+    public DateTimeFormatter getCreneau() {
         return creneau;
     }
 
-    public void setCreneau(String creneau) {
+    public void setCreneau(DateTimeFormatter creneau) {
         this.creneau = creneau;
     }
 
@@ -125,5 +132,9 @@ public class Cours {
 
     public void setNbPlacesOccupees(int nbPlacesOccupees) {
         this.nbPlacesOccupees = nbPlacesOccupees;
+    }
+
+    public void addParticipant(Membre membre) {
+        this.listeMembres.add(membre);
     }
 }

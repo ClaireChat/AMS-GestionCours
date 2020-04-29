@@ -16,11 +16,12 @@ import java.util.List;
 @Repository
 public interface CoursRepository extends MongoRepository<Cours,String> {
 
-
+    @Query("{ 'nomCours' : ?0 }")
     public List<Cours> getAllCours();
 
     @Query("{ 'nomCours' : ?0 }")
     public Cours getCoursByNom(String nomCours);
 
+    @Query("{ 'nomCours' : ?0 }")
     public Cours save(Cours cours);
 }
