@@ -1,7 +1,7 @@
 
 # Reglage serveur
 server:
-  port: 1234
+  port: 10000
 # nom appli
 spring:
   application:
@@ -12,9 +12,9 @@ spring:
       authentication-database: admin
       username: root
       password: root
-      database: mongoDB
+      database: admin
       port: 27017
       host: localhost
-      uri: mongodb://root:root@localhost:27017/mongoDB
+      uri: mongodb://root:root@localhost:27017/admin
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration

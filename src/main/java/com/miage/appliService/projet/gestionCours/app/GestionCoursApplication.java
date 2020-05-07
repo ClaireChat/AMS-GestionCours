@@ -1,4 +1,4 @@
-package com.miage.appliService.projet.gestionCours;
+package com.miage.appliService.projet.gestionCours.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

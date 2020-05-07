@@ -1,42 +1,41 @@
-package com.miage.appliService.projet.gestionCours.entities;
+package com.miage.appliService.projet.gestionCours.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  *
  * @author clairechatenet
  */
 @Document(collection = "Cours")
+//@Entity
 public class Cours {
 
     @Id
-    @GeneratedValue
-    public long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public String id;
 
     @NotNull
-    public String nomCours;
+    public String nom;
 
     @NotNull
     public int niveauCible;
 
     @NotNull
-    public String idEnseignant;
-
-    @ManyToOne
-    public long enseignant;
+    public Long idEnseignant;
 
     @NotNull
     public String lieu;
 
     @NotNull
-    public DateTimeFormatter creneau;
+    @JsonFormat
+            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm")
+    public Date creneau;
 
     @NotNull
     //durée exprimée en minutes
@@ -50,11 +49,11 @@ public class Cours {
     public Cours() {
     }
 
-    public Cours(@NotNull String nomCours, @NotNull int niveauCible, @NotNull String idEnseignant, Long enseignant, @NotNull String lieu, @NotNull DateTimeFormatter creneau, @NotNull int duree) {
-        this.nomCours = nomCours;
+
+    public Cours(@NotNull String nom, @NotNull int niveauCible, @NotNull Long idEnseignant, @NotNull String lieu, @NotNull Date creneau, @NotNull int duree) {
+        this.nom = nom;
         this.niveauCible = niveauCible;
         this.idEnseignant = idEnseignant;
-        this.enseignant = enseignant;
         this.lieu = lieu;
         this.creneau = creneau;
         this.duree = duree;
@@ -62,11 +61,11 @@ public class Cours {
         this.listeMembres=new ArrayList<Membre>();
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -78,20 +77,12 @@ public class Cours {
         this.niveauCible = niveauCible;
     }
 
-    public String getIdEnseignant() {
+    public Long getIdEnseignant() {
         return idEnseignant;
     }
 
-    public void setIdEnseignant(String idEnseignant) {
+    public void setIdEnseignant(Long idEnseignant) {
         this.idEnseignant = idEnseignant;
-    }
-
-    public Long getEnseignant() {
-        return enseignant;
-    }
-
-    public void setEnseignant(Long enseignant) {
-        this.enseignant = enseignant;
     }
 
     public String getLieu() {
@@ -102,11 +93,11 @@ public class Cours {
         this.lieu = lieu;
     }
 
-    public DateTimeFormatter getCreneau() {
+    public Date getCreneau() {
         return creneau;
     }
 
-    public void setCreneau(DateTimeFormatter creneau) {
+    public void setCreneau(Date creneau) {
         this.creneau = creneau;
     }
 
@@ -118,12 +109,12 @@ public class Cours {
         this.duree = duree;
     }
 
-    public String getNomCours() {
-        return nomCours;
+    public String getNom() {
+        return nom;
     }
 
-    public void setNomCours(String nomCours) {
-        this.nomCours = nomCours;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
     public int getNbPlacesOccupees() {
@@ -136,5 +127,20 @@ public class Cours {
 
     public void addParticipant(Membre membre) {
         this.listeMembres.add(membre);
+    }
+
+    @Override
+    public String toString() {
+        return "Cours{" +
+                "id='" + id + '\'' +
+                ", nom='" + nom + '\'' +
+                ", niveauCible=" + niveauCible +
+                ", idEnseignant=" + idEnseignant +
+                ", lieu='" + lieu + '\'' +
+                ", creneau=" + creneau +
+                ", duree=" + duree +
+                ", nbPlacesOccupees=" + nbPlacesOccupees +
+                ", listeMembres=" + listeMembres +
+                '}';
     }
 }

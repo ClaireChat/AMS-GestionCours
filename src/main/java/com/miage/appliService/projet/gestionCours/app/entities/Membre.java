@@ -1,4 +1,4 @@
-package com.miage.appliService.projet.gestionCours.entities;
+package com.miage.appliService.projet.gestionCours.app.entities;
 
 public class Membre {
     public long id;
