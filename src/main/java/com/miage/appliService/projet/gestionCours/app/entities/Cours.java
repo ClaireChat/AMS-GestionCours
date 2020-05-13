@@ -13,14 +13,14 @@ import java.util.Date;
  * @author clairechatenet
  */
 @Document(collection = "Cours")
-//@Entity
 public class Cours {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     public String id;
 
     @NotNull
+    @Column(unique = true)
     public String nom;
 
     @NotNull
@@ -44,21 +44,24 @@ public class Cours {
     public int nbPlacesOccupees;
 
     //liste des membres participant au cours
-    public ArrayList<Membre> listeMembres;
+    public ArrayList<Long> listeMembres;
 
     public Cours() {
+        this.lieu = null;
+        this.nbPlacesOccupees=0;
+        this.listeMembres=new ArrayList<Long>();
     }
 
 
-    public Cours(@NotNull String nom, @NotNull int niveauCible, @NotNull Long idEnseignant, @NotNull String lieu, @NotNull Date creneau, @NotNull int duree) {
+    public Cours(@NotNull String nom, @NotNull int niveauCible, @NotNull Long idEnseignant, @NotNull Date creneau, @NotNull int duree) {
         this.nom = nom;
         this.niveauCible = niveauCible;
         this.idEnseignant = idEnseignant;
-        this.lieu = lieu;
         this.creneau = creneau;
         this.duree = duree;
+        this.lieu = null;
         this.nbPlacesOccupees=0;
-        this.listeMembres=new ArrayList<Membre>();
+        this.listeMembres=new ArrayList<Long>();
     }
 
     public String getId() {
@@ -125,8 +128,16 @@ public class Cours {
         this.nbPlacesOccupees = nbPlacesOccupees;
     }
 
-    public void addParticipant(Membre membre) {
-        this.listeMembres.add(membre);
+    public ArrayList<Long> getListeMembres() {
+        return listeMembres;
+    }
+
+    public void setListeMembres(ArrayList<Long> listeMembres) {
+        this.listeMembres = listeMembres;
+    }
+
+    public void addParticipant(Long idMembre) {
+        this.listeMembres.add(idMembre);
     }
 
     @Override
