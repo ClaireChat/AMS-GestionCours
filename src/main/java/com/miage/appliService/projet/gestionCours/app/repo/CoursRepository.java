@@ -15,4 +15,5 @@ public interface CoursRepository extends MongoRepository<Cours,String> {
 
     Cours findCoursByNom(String nom);
     Cours findCoursById(String id);
+
 }

@@ -19,7 +19,7 @@ public class Cours {
     @GeneratedValue
     public String id;
 
-    @NotNull
+    @NotNull(message = "nom not null")
     @Column(unique = true)
     public String nom;
 
@@ -30,7 +30,7 @@ public class Cours {
     public Long idEnseignant;
 
     @NotNull
-    public String lieu;
+    public String idLieu;
 
     @NotNull
     @JsonFormat
@@ -47,7 +47,7 @@ public class Cours {
     public ArrayList<Long> listeMembres;
 
     public Cours() {
-        this.lieu = null;
+        this.idLieu = null;
         this.nbPlacesOccupees=0;
         this.listeMembres=new ArrayList<Long>();
     }
@@ -59,7 +59,7 @@ public class Cours {
         this.idEnseignant = idEnseignant;
         this.creneau = creneau;
         this.duree = duree;
-        this.lieu = null;
+        this.idLieu = null;
         this.nbPlacesOccupees=0;
         this.listeMembres=new ArrayList<Long>();
     }
@@ -88,12 +88,12 @@ public class Cours {
         this.idEnseignant = idEnseignant;
     }
 
-    public String getLieu() {
-        return lieu;
+    public String getIdLieu() {
+        return idLieu;
     }
 
-    public void setLieu(String lieu) {
-        this.lieu = lieu;
+    public void setIdLieu(String idLieu) {
+        this.idLieu = idLieu;
     }
 
     public Date getCreneau() {
@@ -147,7 +147,7 @@ public class Cours {
                 ", nom='" + nom + '\'' +
                 ", niveauCible=" + niveauCible +
                 ", idEnseignant=" + idEnseignant +
-                ", lieu='" + lieu + '\'' +
+                ", lieu='" + idLieu + '\'' +
                 ", creneau=" + creneau +
                 ", duree=" + duree +
                 ", nbPlacesOccupees=" + nbPlacesOccupees +
