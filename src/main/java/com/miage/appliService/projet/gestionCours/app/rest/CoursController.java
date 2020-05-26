@@ -3,6 +3,8 @@ package com.miage.appliService.projet.gestionCours.app.rest;
 import com.miage.appliService.projet.gestionCours.app.entities.Cours;
 import com.miage.appliService.projet.gestionCours.app.repo.CoursRepository;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.json.simple.JSONArray;
@@ -18,6 +20,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/cours")
 public class CoursController {
+    private static final Logger log = LoggerFactory.getLogger(CoursController.class);
 
     @Autowired
     private CoursRepository coursRepository;
@@ -29,8 +32,9 @@ public class CoursController {
         return "Gestion des cours";
     }
 
-    @RequestMapping("/getAllCours")
-    public List<Cours> getAllCours() {
+    @GetMapping("/getAllCours")
+    public Iterable<Cours> getAllCours() {
+        log.info("/getAllCours requested");
         return this.coursRepository.findAll();
     }
 
