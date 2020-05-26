@@ -1,7 +1,7 @@
 
 # Reglage serveur
 server:
-  port: 10000
+  port: 10001
 # nom appli
 spring:
   application:
