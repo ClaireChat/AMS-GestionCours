@@ -2,26 +2,36 @@ Cours
 {
 	"nom" : "cours1",
 	"niveauCible" : "1",
-	"idEnseignant" : "123",
-	"idLieu" : null,
-	"creneau" : "04-09-2014 16:30",
+	"idLieu" : "c9c4a5c32c16f02ff3123f1da17e4a677ade86f4",
+	"jourPremierCours" : "04-09-2020",
 	"duree" : "60"
 }
-
 {
 	"nom" : "cours2",
 	"niveauCible" : "3",
-	"idEnseignant" : "231",
 	"idLieu" : "485a5ed888b700deb938e5e99c753727f7c33c8c",
-	"creneau" : "12-08-2020 14:00",
+	"jourPremierCours" : "12-08-2020",
 	"duree" : "120"
 }
-
 {
 	"nom" : "cours3",
 	"niveauCible" : "7",
-	"idEnseignant" : "123",
 	"idLieu" : "c9c4a5c32c16f02ff3123f1da17e4a677ade86f4",
-	"creneau" : "20-12-2020 10:00",
+	"creneau" : "20-12-2020",
 	"duree" : "110"
+}
+
+
+Seance
+{
+	"debutSeanceHeure" : "14:00",
+	"jourSeance" : "LUNDI",
+	"idEnseignant" : 1
+
+}
+{
+	"debutSeanceHeure" : "16:30",
+	"jourSeance" : "mardi",
+	"idEnseignant" : 2
+
 }

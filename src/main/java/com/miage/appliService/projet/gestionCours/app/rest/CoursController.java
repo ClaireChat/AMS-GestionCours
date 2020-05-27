@@ -1,19 +1,19 @@
 package com.miage.appliService.projet.gestionCours.app.rest;
 
 import com.miage.appliService.projet.gestionCours.app.entities.Cours;
+import com.miage.appliService.projet.gestionCours.app.entities.Seance;
 import com.miage.appliService.projet.gestionCours.app.repo.CoursRepository;
-import org.json.simple.parser.ParseException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
-
 
 @RestController
 @RequestMapping("/cours")
@@ -24,9 +24,10 @@ public class CoursController {
 
     private static String urlLieux = "https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines";
 
+
     @RequestMapping("/")
     public String home() {
-        return "Gestion des cours";
+        return "Gestion des cours V2";
     }
 
     @RequestMapping("/getAllCours")
@@ -47,7 +48,7 @@ public class CoursController {
     @PostMapping("/create")
     public Cours create(@RequestBody Cours cours) throws Exception {
         // la date d’un cours doit être supérieure de 7 jours par rapport à la date de saisie
-        if(!verifDate(cours.getCreneau()))
+        if(!verifDate(cours.getJourPremierCours()))
             throw new Exception("Erreur : le cours doit débuter dans au moins 7 jours");
 
         //on vérifie que idLieu existe bien dans la liste des lieux existants
@@ -58,16 +59,6 @@ public class CoursController {
         return this.coursRepository.save(cours);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable("id") String id) {
-        this.coursRepository.deleteById(id);
-    }
-
-    @DeleteMapping("/deleteAll")
-    public void deleteAll() {
-        this.coursRepository.deleteAll();
-    }
-
     @PutMapping("/update/{id}")
     public Cours update(@RequestBody Cours newCours, @PathVariable String id) throws Exception {
         // on vérifie que idLieu existe bien dans la liste des lieux existants
@@ -76,23 +67,32 @@ public class CoursController {
                 throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
         }
         // la date d’un cours doit être supérieure de 7 jours par rapport à la date de saisie
-        if(!verifDate(newCours.getCreneau()))
+        if(!verifDate(newCours.getJourPremierCours()))
             throw new Exception("Erreur : le cours doit débuter dans au moins 7 jours");
 
         return this.coursRepository.findById(id).map(cours -> {
             cours.setNom(newCours.getNom());
             cours.setNiveauCible(newCours.getNiveauCible());
             cours.setDuree(newCours.getDuree());
-            cours.setIdEnseignant(newCours.getIdEnseignant());
-            cours.setCreneau(newCours.getCreneau());
             cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             cours.setIdLieu(newCours.getIdLieu());
+            cours.setJourPremierCours(newCours.getJourPremierCours());
             return this.coursRepository.save(cours);
         })
-        .orElseGet(() -> {
-            newCours.setId(id);
-            return this.coursRepository.save(newCours);
-        });
+                .orElseGet(() -> {
+                    newCours.setId(id);
+                    return this.coursRepository.save(newCours);
+                });
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable("id") String id) {
+        this.coursRepository.deleteById(id);
+    }
+
+    @DeleteMapping("/deleteAll")
+    public void deleteAll() {
+        this.coursRepository.deleteAll();
     }
 
     @PutMapping("/inscrireCours/{idCours}/{idMembre}")
@@ -130,7 +130,7 @@ public class CoursController {
     }
 
     @GetMapping("/getLieuFromId/{idLieu}")
-    public JSONObject getLieuFromId(@PathVariable("idLieu") String idLieu) throws Exception {
+    public JSONObject getLieuFromId(@PathVariable String idLieu) throws Exception {
         JSONArray jsonArrayLieux = getJSONArrayLieux();
         JSONObject lieu = null;
         int i = 0;
@@ -148,11 +148,41 @@ public class CoursController {
         return lieu;
     }
 
-    /**
-     * Vérifie que la date passée en paramètre est supérieure de 7 jours par rapport à la date actuelle
-     * @param date
-     * @return boolean
-     */
+    @PutMapping("/addSeance/{idCours}")
+    public Cours addSeance(@RequestBody Seance seance, @PathVariable String idCours) throws Exception {
+        ArrayList<String> joursSemaines = new ArrayList<String>(
+                Arrays.asList("LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"));
+        Cours cours = this.coursRepository.findCoursById(idCours);
+        if(joursSemaines.contains(seance.getJourSeance().toUpperCase()))
+            cours.addSeance(seance);
+        else
+            throw new Exception("Le jour de la séance doit se trouver dans la liste : " + joursSemaines.toString());
+
+        return this.coursRepository.save(cours);
+    }
+
+    @DeleteMapping("/deleteSeance/{idCours}/{idSeance}")
+    public Cours deleteSeance(@PathVariable("idCours") String idCours, @PathVariable("idSeance") Integer idSeance) throws Exception {
+        Cours cours = this.coursRepository.findCoursById(idCours);
+        if(cours.getListeSeances().containsKey(idSeance))
+            cours.getListeSeances().remove(idSeance);
+        else
+            throw new Exception("Id de seance inexistant");
+
+        return this.coursRepository.save(cours);
+    }
+
+    @PutMapping("/updateSeance/{idCours}/{idSeance}")
+    public Cours updateSeance(@RequestBody Seance seance, @PathVariable String idCours, @PathVariable Integer idSeance) throws Exception {
+        ArrayList<String> joursSemaines = new ArrayList<String>(
+                Arrays.asList("LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"));
+        Cours cours = this.coursRepository.findCoursById(idCours);
+        if(joursSemaines.contains(seance.getJourSeance().toUpperCase()))
+            cours.getListeSeances().put(idSeance, seance);
+
+        return this.coursRepository.save(cours);
+    }
+
     private boolean verifDate(Date date) {
         Calendar c = Calendar.getInstance();
         Date currentDate = new Date();
@@ -164,12 +194,6 @@ public class CoursController {
         return true;
     }
 
-    /**
-     * Renvoie la liste des lieux disponibles dans l'API https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines
-     * @return JSONArray
-     * @throws IOException
-     * @throws ParseException
-     */
     private JSONArray getJSONArrayLieux() throws IOException, ParseException {
         URL url = new URL(urlLieux);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -195,13 +219,6 @@ public class CoursController {
         return res;
     }
 
-    /**
-     * Vérifie que l'id passé en paramètre est présent dans la liste des lieux existants
-     * @param idLieu
-     * @return
-     * @throws IOException
-     * @throws ParseException
-     */
     private boolean verifIdLieuExiste(String idLieu) throws IOException, ParseException {
         int i = 0;
         boolean idLieuExiste = false;
@@ -214,20 +231,4 @@ public class CoursController {
         }
         return idLieuExiste;
     }
-
-
-    /*@PutMapping("/choisirLieu/{idLieu}/{idCours}")
-    public Cours choisirLieu(@PathVariable("idLieu") String idLieu, @PathVariable("idCours") String idCours) throws Exception {
-
-        //on vérifie que idCours existe bien dans la liste des cours existants
-            if(!verifIdLieuExiste(newCours.getIdLieu()))
-                throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
-
-        Cours cours = this.coursRepository.findCoursById(idCours);
-        cours.setIdLieu(idLieu);
-        this.coursRepository.save(cours);
-
-        return cours;
-    }*/
-
 }

@@ -7,11 +7,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
-/**
- *
- * @author clairechatenet
- */
 @Document(collection = "Cours")
 public class Cours {
 
@@ -19,7 +16,7 @@ public class Cours {
     @GeneratedValue
     public String id;
 
-    @NotNull(message = "nom not null")
+    @NotNull
     @Column(unique = true)
     public String nom;
 
@@ -27,41 +24,32 @@ public class Cours {
     public int niveauCible;
 
     @NotNull
-    public Long idEnseignant;
-
-    @NotNull
     public String idLieu;
-
-    @NotNull
-    @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm")
-    public Date creneau;
 
     @NotNull
     //durée exprimée en minutes
     public int duree;
 
+    @JsonFormat
+            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    public Date jourPremierCours;
+
     public int nbPlacesOccupees;
+
+    //liste des séances de cours
+    public HashMap<Integer, Seance> listeSeances;
 
     //liste des membres participant au cours
     public ArrayList<Long> listeMembres;
 
+    private int cptIdSeance;
+
     public Cours() {
-        this.idLieu = null;
+        this.cptIdSeance=0;
+        this.idLieu=null;
         this.nbPlacesOccupees=0;
         this.listeMembres=new ArrayList<Long>();
-    }
-
-
-    public Cours(@NotNull String nom, @NotNull int niveauCible, @NotNull Long idEnseignant, @NotNull Date creneau, @NotNull int duree) {
-        this.nom = nom;
-        this.niveauCible = niveauCible;
-        this.idEnseignant = idEnseignant;
-        this.creneau = creneau;
-        this.duree = duree;
-        this.idLieu = null;
-        this.nbPlacesOccupees=0;
-        this.listeMembres=new ArrayList<Long>();
+        this.listeSeances=new HashMap<Integer, Seance>();
     }
 
     public String getId() {
@@ -72,20 +60,20 @@ public class Cours {
         this.id = id;
     }
 
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
     public int getNiveauCible() {
         return niveauCible;
     }
 
     public void setNiveauCible(int niveauCible) {
         this.niveauCible = niveauCible;
-    }
-
-    public Long getIdEnseignant() {
-        return idEnseignant;
-    }
-
-    public void setIdEnseignant(Long idEnseignant) {
-        this.idEnseignant = idEnseignant;
     }
 
     public String getIdLieu() {
@@ -96,14 +84,6 @@ public class Cours {
         this.idLieu = idLieu;
     }
 
-    public Date getCreneau() {
-        return creneau;
-    }
-
-    public void setCreneau(Date creneau) {
-        this.creneau = creneau;
-    }
-
     public int getDuree() {
         return duree;
     }
@@ -112,20 +92,28 @@ public class Cours {
         this.duree = duree;
     }
 
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
     public int getNbPlacesOccupees() {
         return nbPlacesOccupees;
     }
 
     public void setNbPlacesOccupees(int nbPlacesOccupees) {
         this.nbPlacesOccupees = nbPlacesOccupees;
+    }
+
+    public Date getJourPremierCours() {
+        return jourPremierCours;
+    }
+
+    public void setJourPremierCours(Date jourPremierCours) {
+        this.jourPremierCours = jourPremierCours;
+    }
+
+    public HashMap<Integer, Seance> getListeSeances() {
+        return listeSeances;
+    }
+
+    public void setListeSeances(HashMap<Integer, Seance> listeSeances) {
+        this.listeSeances = listeSeances;
     }
 
     public ArrayList<Long> getListeMembres() {
@@ -140,17 +128,22 @@ public class Cours {
         this.listeMembres.add(idMembre);
     }
 
+    public void addSeance(Seance seance) {
+        this.listeSeances.put(cptIdSeance, seance);
+        cptIdSeance+=1;
+    }
+
     @Override
     public String toString() {
-        return "Cours{" +
+        return "Cours {" +
                 "id='" + id + '\'' +
                 ", nom='" + nom + '\'' +
                 ", niveauCible=" + niveauCible +
-                ", idEnseignant=" + idEnseignant +
-                ", lieu='" + idLieu + '\'' +
-                ", creneau=" + creneau +
+                ", idLieu='" + idLieu + '\'' +
                 ", duree=" + duree +
+                ", jourPremierCours=" + jourPremierCours +
                 ", nbPlacesOccupees=" + nbPlacesOccupees +
+                ", listeSeances=" + listeSeances +
                 ", listeMembres=" + listeMembres +
                 '}';
     }
