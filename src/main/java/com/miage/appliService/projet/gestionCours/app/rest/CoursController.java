@@ -15,6 +15,9 @@ import org.json.simple.parser.JSONParser;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @RestController
@@ -25,12 +28,13 @@ public class CoursController {
     @Autowired
     private CoursRepository coursRepository;
 
+
     private static String urlLieux = "https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines";
 
 
     @RequestMapping("/")
     public String home() {
-        return "Gestion des cours V2";
+        return "Gestion des cours";
     }
 
     @GetMapping("/getAllCours")
@@ -52,12 +56,7 @@ public class CoursController {
 
     @PostMapping("/create")
     public Cours create(@RequestBody Cours cours) throws Exception {
-
         log.info(cours.toString());
-
-        // la date d’un cours doit être supérieure de 7 jours par rapport à la date de saisie
-        if(!verifDate(cours.getJourPremierCours()))
-            throw new Exception("Erreur : le cours doit débuter dans au moins 7 jours");
 
         //on vérifie que idLieu existe bien dans la liste des lieux existants
         if(cours.getIdLieu()!=null) {
@@ -74,9 +73,6 @@ public class CoursController {
             if(!verifIdLieuExiste(newCours.getIdLieu()))
                 throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
         }
-        // la date d’un cours doit être supérieure de 7 jours par rapport à la date de saisie
-        if(!verifDate(newCours.getJourPremierCours()))
-            throw new Exception("Erreur : le cours doit débuter dans au moins 7 jours");
 
         return this.coursRepository.findById(id).map(cours -> {
             cours.setNom(newCours.getNom());
@@ -84,7 +80,6 @@ public class CoursController {
             cours.setDuree(newCours.getDuree());
             cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             cours.setIdLieu(newCours.getIdLieu());
-            cours.setJourPremierCours(newCours.getJourPremierCours());
             return this.coursRepository.save(cours);
         })
                 .orElseGet(() -> {
@@ -156,52 +151,94 @@ public class CoursController {
         return lieu;
     }
 
+    /**
+     * Permet d'ajouter une séance à un cours
+     * @param seance
+     * @param idCours
+     * @return Cours
+     * @throws Exception
+     */
     @PutMapping("/addSeance/{idCours}")
     public Cours addSeance(@RequestBody Seance seance, @PathVariable String idCours) throws Exception {
-        ArrayList<String> joursSemaines = new ArrayList<String>(
-                Arrays.asList("LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"));
         Cours cours = this.coursRepository.findCoursById(idCours);
-        if(joursSemaines.contains(seance.getJourSeance().toUpperCase()))
-            cours.addSeance(seance);
+            // on vérifie que l'enseignant est libre pendant les horaires de la séance
+        if(verifDate(seance.getDebutSeance())) {
+            if (verifEnseignantLibre(seance.getIdEnseignant(), seance, cours.getDuree())) {
+                cours.addSeance(seance);
+            } else
+                throw new Exception("Erreur : L'enseignant est deja pris pendant ces horaires");
+        }
         else
-            throw new Exception("Le jour de la séance doit se trouver dans la liste : " + joursSemaines.toString());
-
+            throw new Exception("Erreur : le cours doit debuter dans au moins 7 jours");
         return this.coursRepository.save(cours);
     }
 
+    /**
+     * Permet de supprimer une séance d'un cours
+     * @param idCours
+     * @param idSeance
+     * @return Cours
+     * @throws Exception
+     */
     @DeleteMapping("/deleteSeance/{idCours}/{idSeance}")
     public Cours deleteSeance(@PathVariable("idCours") String idCours, @PathVariable("idSeance") Integer idSeance) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         if(cours.getListeSeances().containsKey(idSeance))
             cours.getListeSeances().remove(idSeance);
         else
-            throw new Exception("Id de seance inexistant");
+            throw new Exception("Erreur : Id de seance inexistant");
 
         return this.coursRepository.save(cours);
     }
 
+    /**
+     * Permet de supprimer une séance d'un cours
+     * @param seance
+     * @param idCours
+     * @param idSeance
+     * @return Cours
+     * @throws Exception
+     */
     @PutMapping("/updateSeance/{idCours}/{idSeance}")
     public Cours updateSeance(@RequestBody Seance seance, @PathVariable String idCours, @PathVariable Integer idSeance) throws Exception {
-        ArrayList<String> joursSemaines = new ArrayList<String>(
-                Arrays.asList("LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"));
         Cours cours = this.coursRepository.findCoursById(idCours);
-        if(joursSemaines.contains(seance.getJourSeance().toUpperCase()))
-            cours.getListeSeances().put(idSeance, seance);
+        if(cours.getListeSeances().containsKey(idSeance)) {
+            // on vérifie que l'enseignant est libre pendant les horaires de la séance
+            if (verifEnseignantLibre(seance.getIdEnseignant(), seance, cours.getDuree())) {
+                cours.getListeSeances().put(idSeance, seance);
+            } else
+                throw new Exception("Erreur : L'enseignant est deja pris pendant ces horaires");
+        }
+        else
+            throw new Exception("Erreur : Id de seance inexistant");
 
         return this.coursRepository.save(cours);
     }
 
-    private boolean verifDate(Date date) {
+    /**
+     * Vérifie que la date passée en paramètre est supérieure de 7 jours par rapport à la date actuelle
+     * @param date
+     * @return boolean
+     */
+    private boolean verifDate(LocalDateTime date) {
         Calendar c = Calendar.getInstance();
         Date currentDate = new Date();
         c.setTime(currentDate);
         c.add(Calendar.DAY_OF_MONTH, 7);
 
-        if(!c.getTime().before(date))
+        if(!c.getTime().before(java.util.Date
+                .from(date.atZone(ZoneId.systemDefault())
+                        .toInstant())))
             return false;
         return true;
     }
 
+    /**
+     * Renvoie la liste des lieux disponibles dans l'API https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines
+     * @return JSONArray
+     * @throws IOException
+     * @throws ParseException
+     */
     private JSONArray getJSONArrayLieux() throws IOException, ParseException {
         URL url = new URL(urlLieux);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -227,6 +264,13 @@ public class CoursController {
         return res;
     }
 
+    /**
+     * Vérifie que l'id passé en paramètre est présent dans la liste des lieux existants
+     * @param idLieu
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     private boolean verifIdLieuExiste(String idLieu) throws IOException, ParseException {
         int i = 0;
         boolean idLieuExiste = false;
@@ -238,5 +282,37 @@ public class CoursController {
             i++;
         }
         return idLieuExiste;
+    }
+
+    private boolean verifEnseignantLibre(Long idEnseignant, Seance newSeance, int duree) {
+        boolean res = true;
+        List<Cours> listeCours = this.coursRepository.findAll();
+        // Parcours de tous les cours existants
+        for(Cours cours : listeCours) {
+            HashMap<Integer, Seance> mapSeances = cours.getListeSeances();
+            // Parcours de séances du cours
+            for(Seance seance : mapSeances.values()) {
+                // on vérifie que c'est le même enseignant et le même jour
+                if(idEnseignant.equals(seance.getIdEnseignant())) {
+                    if (seance.getDebutSeance().toLocalDate().equals(newSeance.getDebutSeance().toLocalDate())) {
+                        // on récupère les horaires
+                        LocalTime debutSeance = seance.getDebutSeance().toLocalTime();
+                        LocalTime finSeance = debutSeance.plusMinutes(cours.getDuree());
+                        LocalTime debutNewSeance = newSeance.getDebutSeance().toLocalTime();
+                        LocalTime finNewSeance = debutNewSeance.plusMinutes(duree);
+                        //heureDebutSeance < heureDebutNewSeance < heureFinSeance
+                        if (debutNewSeance.isAfter(debutSeance) && debutNewSeance.isBefore(finSeance))
+                            return false;
+                        //heureDebutSeance < heureFinNewSeance < heureFinSeance
+                        if (finNewSeance.isAfter(debutSeance) && debutNewSeance.isBefore(finSeance))
+                            return false;
+                        //heureDebutNewSeance < heureDebutSeance && heureFinNewSeance > heureFinSeance
+                        if (debutNewSeance.isBefore(debutSeance) && finNewSeance.isAfter(finSeance))
+                            return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

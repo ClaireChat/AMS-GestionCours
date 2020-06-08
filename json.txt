@@ -24,14 +24,7 @@ Cours
 
 Seance
 {
-	"debutSeanceHeure" : "14:00",
-	"jourSeance" : "LUNDI",
+	"debutSeance" : "03-06-2020 14:00",
 	"idEnseignant" : 1
-
-}
-{
-	"debutSeanceHeure" : "16:30",
-	"jourSeance" : "mardi",
-	"idEnseignant" : 2
 
 }
