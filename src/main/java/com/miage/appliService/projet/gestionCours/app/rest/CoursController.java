@@ -41,6 +41,7 @@ public class CoursController {
 
     @GetMapping("/getCoursById/{id}")
     public Cours getCoursById(@PathVariable String id) {
+        log.info("getCoursById (id:"+id+")");
         return this.coursRepository.findCoursById(id);
     }
 
@@ -51,6 +52,9 @@ public class CoursController {
 
     @PostMapping("/create")
     public Cours create(@RequestBody Cours cours) throws Exception {
+
+        log.info(cours.toString());
+
         // la date d’un cours doit être supérieure de 7 jours par rapport à la date de saisie
         if(!verifDate(cours.getJourPremierCours()))
             throw new Exception("Erreur : le cours doit débuter dans au moins 7 jours");
