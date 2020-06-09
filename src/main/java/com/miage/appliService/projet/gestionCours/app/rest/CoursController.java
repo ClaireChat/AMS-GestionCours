@@ -1,19 +1,19 @@
 package com.miage.appliService.projet.gestionCours.app.rest;
 
 import com.miage.appliService.projet.gestionCours.app.entities.Cours;
+import com.miage.appliService.projet.gestionCours.app.entities.Lieu;
 import com.miage.appliService.projet.gestionCours.app.entities.Seance;
 import com.miage.appliService.projet.gestionCours.app.repo.CoursRepository;
-import org.json.simple.parser.ParseException;
+
+import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,14 +23,12 @@ import java.util.*;
 @RestController
 @RequestMapping("/cours")
 public class CoursController {
+
     private static final Logger log = LoggerFactory.getLogger(CoursController.class);
+    private static String urlLieux = "https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines";
 
     @Autowired
     private CoursRepository coursRepository;
-
-
-    private static String urlLieux = "https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines";
-
 
     @RequestMapping("/")
     public String home() {
@@ -124,28 +122,27 @@ public class CoursController {
     }
 
     @GetMapping("/getLieux")
-    public ArrayList<JSONObject> getLieux() throws IOException, ParseException {
-        JSONArray jsonArrayLieux = getJSONArrayLieux();
-        return jsonArrayLieux;
+    public ArrayList<Lieu> getLieux() throws IOException {
+        return getListeLieux();
     }
 
-    @GetMapping("/getLieuFromId/{idLieu}")
-    public JSONObject getLieuFromId(@PathVariable String idLieu) throws Exception {
-        JSONArray jsonArrayLieux = getJSONArrayLieux();
-        JSONObject lieu = null;
+    @GetMapping("/getLieuById/{idLieu}")
+    public Lieu getLieuById(@PathVariable String idLieu) throws Exception {
+        ArrayList<Lieu> listeLieux = getListeLieux();
+        Lieu res = null;
         int i = 0;
-        while(lieu==null & i<jsonArrayLieux.size()) {
-            JSONObject jsonobj  = ((JSONObject)jsonArrayLieux.get(i));
-            if(jsonobj.get("recordid").equals(idLieu)) {
-                lieu = (JSONObject) jsonobj.get("fields");
+        while(res==null & i<listeLieux.size()) {
+            Lieu lieu  = listeLieux.get(i);
+            if(lieu.getId().equals(idLieu)) {
+                res = lieu;
             }
             i++;
         }
 
-        if(lieu==null)
+        if(res==null)
             throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
 
-        return lieu;
+        return res;
     }
 
     /**
@@ -158,7 +155,7 @@ public class CoursController {
     @PutMapping("/addSeance/{idCours}")
     public Cours addSeance(@RequestBody Seance seance, @PathVariable String idCours) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
-            // on vérifie que l'enseignant est libre pendant les horaires de la séance
+        // on vérifie que l'enseignant est libre pendant les horaires de la séance
         if(verifDate(seance.getDebutSeance())) {
             if (verifEnseignantLibre(seance.getIdEnseignant(), seance, cours.getDuree())) {
                 cours.addSeance(seance);
@@ -223,42 +220,44 @@ public class CoursController {
         c.setTime(currentDate);
         c.add(Calendar.DAY_OF_MONTH, 7);
 
-        if(!c.getTime().before(java.util.Date
+        return c.getTime().before(Date
                 .from(date.atZone(ZoneId.systemDefault())
-                        .toInstant())))
-            return false;
-        return true;
+                        .toInstant()));
     }
 
     /**
-     * Renvoie la liste des lieux disponibles dans l'API https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines
-     * @return JSONArray
+     * Renvoie la liste des lieux disponibles depuis l'API https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines
+     * @return ArrayList<Lieu>
      * @throws IOException
-     * @throws ParseException
      */
-    private JSONArray getJSONArrayLieux() throws IOException, ParseException {
+    private ArrayList<Lieu> getListeLieux() throws IOException {
         URL url = new URL(urlLieux);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.connect();
-        int responsecode = conn.getResponseCode();
-        JSONArray res = null;
+        String genreJson = IOUtils.toString(url);
+        JSONObject objet = new JSONObject(genreJson);
+        JSONArray jsonArray = (JSONArray) objet.get("records");
+        ArrayList<Lieu> listeLieux = new ArrayList<>();
 
-        if(responsecode != 200)
-            throw new RuntimeException("HttpResponseCode: " +responsecode);
-        else {
-            Scanner sc = new Scanner(url.openStream());
-            String inline = "";
-            while (sc.hasNext()) {
-                inline += sc.nextLine();
-            }
-            sc.close();
-            JSONParser parse = new JSONParser();
-            JSONObject jobj = (JSONObject) parse.parse(inline);
-            res = (JSONArray) jobj.get("records");
+        // Parcours de la JSONArray pour créer l'ArrayList de lieux avec les informations qui nous intéressent
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Lieu lieu = new Lieu();
+            JSONObject row = jsonArray.getJSONObject(i);
+            lieu.setId(row.getString("recordid"));
+            JSONObject fields = row.getJSONObject("fields");
+            lieu.setSaison(fields.getString("saison"));
+            lieu.setAdresse(fields.getString("adresse"));
+            lieu.setIndex(fields.getString("index"));
+            lieu.setNom(fields.getString("nom_complet"));
+            lieu.setTelephone(fields.getString("telephone"));
+
+            JSONArray jsonCoord = fields.getJSONObject("geo_shape").getJSONArray("coordinates");
+            List<Double> listeCoord = new ArrayList<>();
+            listeCoord.add((Double)jsonCoord.get(0));
+            listeCoord.add((Double)jsonCoord.get(1));
+            lieu.setCoordonnees(listeCoord);
+
+            listeLieux.add(lieu);
         }
-        conn.disconnect();
-        return res;
+        return listeLieux;
     }
 
     /**
@@ -266,15 +265,14 @@ public class CoursController {
      * @param idLieu
      * @return
      * @throws IOException
-     * @throws ParseException
      */
-    private boolean verifIdLieuExiste(String idLieu) throws IOException, ParseException {
+    private boolean verifIdLieuExiste(String idLieu) throws IOException {
         int i = 0;
         boolean idLieuExiste = false;
-        JSONArray jsonArrayLieux = getJSONArrayLieux();
-        while (!idLieuExiste & i < jsonArrayLieux.size()) {
-            JSONObject jsonobj = ((JSONObject) jsonArrayLieux.get(i));
-            if (jsonobj.get("recordid").equals(idLieu))
+        ArrayList<Lieu> listeLieux = getListeLieux();
+        while (!idLieuExiste & i < listeLieux.size()) {
+            Lieu lieu = listeLieux.get(i);
+            if (lieu.getId().equals(idLieu))
                 idLieuExiste = true;
             i++;
         }
