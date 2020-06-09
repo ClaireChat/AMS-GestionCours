@@ -43,6 +43,7 @@ public class CoursController {
 
     @GetMapping("/getCoursById/{id}")
     public Cours getCoursById(@PathVariable String id) {
+        log.info("getCoursById (id:"+id+")");
         return this.coursRepository.findCoursById(id);
     }
 
@@ -61,7 +62,7 @@ public class CoursController {
         return this.coursRepository.save(cours);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update/{id}")
     public Cours update(@RequestBody Cours newCours, @PathVariable String id) throws Exception {
         // on vérifie que idLieu existe bien dans la liste des lieux existants
         if(newCours.getIdLieu()!=null) {
@@ -93,7 +94,7 @@ public class CoursController {
         this.coursRepository.deleteAll();
     }
 
-    @PutMapping("/inscrireCours/{idCours}/{idMembre}")
+    @PostMapping("/inscrireCours/{idCours}/{idMembre}")
     public Cours inscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
 
@@ -112,7 +113,7 @@ public class CoursController {
         return this.coursRepository.save(cours);
     }
 
-    @PutMapping("/desinscrireCours/{idCours}/{idMembre}")
+    @PostMapping("/desinscrireCours/{idCours}/{idMembre}")
     public Cours desinscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) {
         Cours cours = this.coursRepository.findCoursById(idCours);
         ArrayList<Long> listeMembres = cours.getListeMembres();
@@ -152,7 +153,7 @@ public class CoursController {
      * @return Cours
      * @throws Exception
      */
-    @PutMapping("/addSeance/{idCours}")
+    @PostMapping("/addSeance/{idCours}")
     public Cours addSeance(@RequestBody Seance seance, @PathVariable String idCours) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         // on vérifie que l'enseignant est libre pendant les horaires de la séance
@@ -193,7 +194,7 @@ public class CoursController {
      * @return Cours
      * @throws Exception
      */
-    @PutMapping("/updateSeance/{idCours}/{idSeance}")
+    @PostMapping("/updateSeance/{idCours}/{idSeance}")
     public Cours updateSeance(@RequestBody Seance seance, @PathVariable String idCours, @PathVariable Integer idSeance) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         if(cours.getListeSeances().containsKey(idSeance)) {

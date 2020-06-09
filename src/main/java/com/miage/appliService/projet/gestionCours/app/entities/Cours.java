@@ -30,6 +30,14 @@ public class Cours {
 
     public int nbPlacesOccupees;
 
+    public int getCptIdSeance() {
+        return cptIdSeance;
+    }
+
+    public void setCptIdSeance(int cptIdSeance) {
+        this.cptIdSeance = cptIdSeance;
+    }
+
     //liste des séances de cours
     public HashMap<Integer, Seance> listeSeances;
 
