@@ -74,7 +74,6 @@ public class CoursController {
             cours.setNom(newCours.getNom());
             cours.setNiveauCible(newCours.getNiveauCible());
             cours.setDuree(newCours.getDuree());
-            cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             cours.setIdLieu(newCours.getIdLieu());
             return this.coursRepository.save(cours);
         })
@@ -100,9 +99,9 @@ public class CoursController {
 
         //le membre ne doit pas être déjà inscrit au cours
         if(!cours.getListeMembres().contains(idMembre)) {
+            int nbParticipants = cours.getListeMembres().size();
             //  le nombre de personnes maximales dans chaque cours est 2 personnes
-            if(cours.getNbPlacesOccupees()>=0 && cours.getNbPlacesOccupees()<=1) {
-                cours.setNbPlacesOccupees(cours.getNbPlacesOccupees() + 1);
+            if(nbParticipants>=0 && nbParticipants<=1) {
                 cours.addParticipant(idMembre);
             }
             else

@@ -28,8 +28,6 @@ public class Cours {
     //durée exprimée en minutes
     public int duree;
 
-    public int nbPlacesOccupees;
-
     public int getCptIdSeance() {
         return cptIdSeance;
     }
@@ -49,7 +47,6 @@ public class Cours {
     public Cours() {
         this.cptIdSeance=0;
         this.idLieu=null;
-        this.nbPlacesOccupees=0;
         this.listeMembres=new ArrayList<>();
         this.listeSeances=new HashMap<>();
     }
@@ -94,14 +91,6 @@ public class Cours {
         this.duree = duree;
     }
 
-    public int getNbPlacesOccupees() {
-        return nbPlacesOccupees;
-    }
-
-    public void setNbPlacesOccupees(int nbPlacesOccupees) {
-        this.nbPlacesOccupees = nbPlacesOccupees;
-    }
-
     public HashMap<Integer, Seance> getListeSeances() {
         return listeSeances;
     }
@@ -135,7 +124,6 @@ public class Cours {
                 ", niveauCible=" + niveauCible +
                 ", idLieu='" + idLieu + '\'' +
                 ", duree=" + duree +
-                ", nbPlacesOccupees=" + nbPlacesOccupees +
                 ", listeSeances=" + listeSeances +
                 ", listeMembres=" + listeMembres +
                 '}';
