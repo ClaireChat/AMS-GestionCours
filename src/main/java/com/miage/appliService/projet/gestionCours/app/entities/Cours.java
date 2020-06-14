@@ -28,6 +28,8 @@ public class Cours {
     //durée exprimée en minutes
     public int duree;
 
+    public int nbPlacesOccupees;
+
     public int getCptIdSeance() {
         return cptIdSeance;
     }
@@ -49,6 +51,7 @@ public class Cours {
         this.idLieu=null;
         this.listeMembres=new ArrayList<>();
         this.listeSeances=new HashMap<>();
+        this.nbPlacesOccupees=0;
     }
 
     public String getId() {
@@ -111,21 +114,32 @@ public class Cours {
         this.listeMembres.add(idMembre);
     }
 
+    public int getNbPlacesOccupees() {
+        return nbPlacesOccupees;
+    }
+
+    public void setNbPlacesOccupees(int nbPlacesOccupees) {
+        this.nbPlacesOccupees = nbPlacesOccupees;
+    }
+
     public void addSeance(Seance seance) {
         this.listeSeances.put(cptIdSeance, seance);
         cptIdSeance+=1;
     }
 
+
     @Override
     public String toString() {
-        return "Cours {" +
+        return "Cours{" +
                 "id='" + id + '\'' +
                 ", nom='" + nom + '\'' +
                 ", niveauCible=" + niveauCible +
                 ", idLieu='" + idLieu + '\'' +
                 ", duree=" + duree +
+                ", nbPlacesOccupees=" + nbPlacesOccupees +
                 ", listeSeances=" + listeSeances +
                 ", listeMembres=" + listeMembres +
+                ", cptIdSeance=" + cptIdSeance +
                 '}';
     }
 }
