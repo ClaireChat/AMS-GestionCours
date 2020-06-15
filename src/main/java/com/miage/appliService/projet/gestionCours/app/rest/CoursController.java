@@ -75,8 +75,8 @@ public class CoursController {
             cours.setNom(newCours.getNom());
             cours.setNiveauCible(newCours.getNiveauCible());
             cours.setDuree(newCours.getDuree());
-            cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             cours.setIdLieu(newCours.getIdLieu());
+            cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             return this.coursRepository.save(cours);
         })
                 .orElseGet(() -> {
@@ -104,8 +104,8 @@ public class CoursController {
         if(!cours.getListeMembres().contains(idMembre)) {
             //  le nombre de personnes maximales dans chaque cours est 2 personnes
             if(cours.getNbPlacesOccupees()>=0 && cours.getNbPlacesOccupees()<=1) {
-                cours.setNbPlacesOccupees(cours.getNbPlacesOccupees() + 1);
                 cours.addParticipant(idMembre);
+                cours.setNbPlacesOccupees(cours.getListeMembres().size());
             }
             else
                 throw new Exception("Erreur : nombre de places insuffisant");
@@ -121,6 +121,7 @@ public class CoursController {
         ArrayList<Long> listeMembres = cours.getListeMembres();
         listeMembres.remove(idMembre);
         cours.setListeMembres(listeMembres);
+        cours.setNbPlacesOccupees(cours.getListeMembres().size());
         return this.coursRepository.save(cours);
     }
 

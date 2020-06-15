@@ -49,9 +49,9 @@ public class Cours {
     public Cours() {
         this.cptIdSeance=0;
         this.idLieu=null;
-        this.nbPlacesOccupees=0;
         this.listeMembres=new ArrayList<>();
         this.listeSeances=new HashMap<>();
+        this.nbPlacesOccupees=0;
     }
 
     public String getId() {
@@ -94,14 +94,6 @@ public class Cours {
         this.duree = duree;
     }
 
-    public int getNbPlacesOccupees() {
-        return nbPlacesOccupees;
-    }
-
-    public void setNbPlacesOccupees(int nbPlacesOccupees) {
-        this.nbPlacesOccupees = nbPlacesOccupees;
-    }
-
     public HashMap<Integer, Seance> getListeSeances() {
         return listeSeances;
     }
@@ -122,14 +114,23 @@ public class Cours {
         this.listeMembres.add(idMembre);
     }
 
+    public int getNbPlacesOccupees() {
+        return nbPlacesOccupees;
+    }
+
+    public void setNbPlacesOccupees(int nbPlacesOccupees) {
+        this.nbPlacesOccupees = nbPlacesOccupees;
+    }
+
     public void addSeance(Seance seance) {
         this.listeSeances.put(cptIdSeance, seance);
         cptIdSeance+=1;
     }
 
+
     @Override
     public String toString() {
-        return "Cours {" +
+        return "Cours{" +
                 "id='" + id + '\'' +
                 ", nom='" + nom + '\'' +
                 ", niveauCible=" + niveauCible +
@@ -138,6 +139,7 @@ public class Cours {
                 ", nbPlacesOccupees=" + nbPlacesOccupees +
                 ", listeSeances=" + listeSeances +
                 ", listeMembres=" + listeMembres +
+                ", cptIdSeance=" + cptIdSeance +
                 '}';
     }
 }
