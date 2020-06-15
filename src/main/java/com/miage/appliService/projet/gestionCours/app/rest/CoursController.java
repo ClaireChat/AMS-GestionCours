@@ -5,6 +5,7 @@ import com.miage.appliService.projet.gestionCours.app.entities.Lieu;
 import com.miage.appliService.projet.gestionCours.app.entities.Seance;
 import com.miage.appliService.projet.gestionCours.app.repo.CoursRepository;
 
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -84,7 +85,7 @@ public class CoursController {
                 });
     }
 
-    @DeleteMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public void delete(@PathVariable("id") String id) {
         this.coursRepository.deleteById(id);
     }
@@ -94,8 +95,9 @@ public class CoursController {
         this.coursRepository.deleteAll();
     }
 
-    @PostMapping("/inscrireCours/{idCours}/{idMembre}")
+    @GetMapping("/inscrireCours/{idCours}/{idMembre}")
     public Cours inscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) throws Exception {
+        log.info("inscrireCours/"+idCours+"/"+idMembre);
         Cours cours = this.coursRepository.findCoursById(idCours);
 
         //le membre ne doit pas être déjà inscrit au cours
@@ -113,7 +115,7 @@ public class CoursController {
         return this.coursRepository.save(cours);
     }
 
-    @PostMapping("/desinscrireCours/{idCours}/{idMembre}")
+    @GetMapping("/desinscrireCours/{idCours}/{idMembre}")
     public Cours desinscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) {
         Cours cours = this.coursRepository.findCoursById(idCours);
         ArrayList<Long> listeMembres = cours.getListeMembres();
@@ -175,7 +177,7 @@ public class CoursController {
      * @return Cours
      * @throws Exception
      */
-    @DeleteMapping("/deleteSeance/{idCours}/{idSeance}")
+    @GetMapping("/deleteSeance/{idCours}/{idSeance}")
     public Cours deleteSeance(@PathVariable("idCours") String idCours, @PathVariable("idSeance") Integer idSeance) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         if(cours.getListeSeances().containsKey(idSeance))
