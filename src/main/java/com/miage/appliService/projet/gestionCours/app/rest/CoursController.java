@@ -85,12 +85,12 @@ public class CoursController {
                 });
     }
 
-    @DeleteMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public void delete(@PathVariable("id") String id) {
         this.coursRepository.deleteById(id);
     }
 
-    @DeleteMapping("/deleteAll")
+    @PostMapping("/deleteAll")
     public void deleteAll() {
         this.coursRepository.deleteAll();
     }
@@ -165,7 +165,7 @@ public class CoursController {
      * @return Cours
      * @throws Exception
      */
-    @DeleteMapping("/deleteSeance/{idCours}/{idSeance}")
+    @PostMapping("/deleteSeance/{idCours}/{idSeance}")
     public Cours deleteSeance(@PathVariable("idCours") String idCours, @PathVariable("idSeance") Integer idSeance) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         if(cours.getListeSeances().containsKey(idSeance))
