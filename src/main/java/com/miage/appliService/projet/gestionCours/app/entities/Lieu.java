@@ -81,4 +81,16 @@ public class Lieu {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Lieu{" +
+                "id='" + id + '\'' +
+                ", nom='" + nom + '\'' +
+                ", saison='" + saison + '\'' +
+                ", coordonnees=" + coordonnees +
+                ", adresse='" + adresse + '\'' +
+                ", telephone='" + telephone + '\'' +
+                ", index='" + index + '\'' +
+                '}';
+    }
 }

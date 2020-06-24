@@ -22,7 +22,7 @@ public class Cours {
     public int niveauCible;
 
     @NotNull
-    public String idLieu;
+    public Lieu lieu;
 
     @NotNull
     //durée exprimée en minutes
@@ -48,7 +48,6 @@ public class Cours {
 
     public Cours() {
         this.cptIdSeance=0;
-        this.idLieu=null;
         this.listeMembres=new ArrayList<>();
         this.listeSeances=new HashMap<>();
         this.nbPlacesOccupees=0;
@@ -78,12 +77,12 @@ public class Cours {
         this.niveauCible = niveauCible;
     }
 
-    public String getIdLieu() {
-        return idLieu;
+    public Lieu getLieu() {
+        return lieu;
     }
 
-    public void setIdLieu(String idLieu) {
-        this.idLieu = idLieu;
+    public void setLieu(Lieu lieu) {
+        this.lieu = lieu;
     }
 
     public int getDuree() {
@@ -134,7 +133,7 @@ public class Cours {
                 "id='" + id + '\'' +
                 ", nom='" + nom + '\'' +
                 ", niveauCible=" + niveauCible +
-                ", idLieu='" + idLieu + '\'' +
+                ", lieu=" + lieu +
                 ", duree=" + duree +
                 ", nbPlacesOccupees=" + nbPlacesOccupees +
                 ", listeSeances=" + listeSeances +

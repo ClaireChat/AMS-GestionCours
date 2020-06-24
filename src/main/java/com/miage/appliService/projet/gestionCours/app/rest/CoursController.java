@@ -53,34 +53,35 @@ public class CoursController {
         return this.coursRepository.findCoursByNom(nomCours);
     }
 
-    @PostMapping("/create")
-    public Cours create(@RequestBody Cours cours) throws Exception {
-        //on vérifie que idLieu existe bien dans la liste des lieux existants
-        if(cours.getIdLieu()!=null) {
-            if(!verifIdLieuExiste(cours.getIdLieu()))
-                throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
+    @PostMapping("/create/{idLieu}")
+    public Cours create(@RequestBody Cours cours, @PathVariable String idLieu) throws Exception {
+        // on vérifie que idLieu existe bien dans la liste des lieux existants
+        if(verifIdLieuExiste(idLieu)) {
+            Lieu lieu = getOneLieu(idLieu);
+            cours.setLieu(lieu);
         }
+        else
+            throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
+
         return this.coursRepository.save(cours);
     }
 
-    @PostMapping("/update/{id}")
-    public Cours update(@RequestBody Cours newCours, @PathVariable String id) throws Exception {
+    @PostMapping("/update/{idCours}/{idLieu}")
+    public Cours update(@RequestBody Cours newCours, @PathVariable String idCours, @PathVariable String idLieu) throws Exception {
         // on vérifie que idLieu existe bien dans la liste des lieux existants
-        if(newCours.getIdLieu()!=null) {
-            if(!verifIdLieuExiste(newCours.getIdLieu()))
-                throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
-        }
-
-        return this.coursRepository.findById(id).map(cours -> {
+        if(!verifIdLieuExiste(idLieu))
+            throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
+        Lieu lieu = getOneLieu(idLieu);
+        return this.coursRepository.findById(idCours).map(cours -> {
+            cours.setLieu(lieu);
             cours.setNom(newCours.getNom());
             cours.setNiveauCible(newCours.getNiveauCible());
             cours.setDuree(newCours.getDuree());
-            cours.setIdLieu(newCours.getIdLieu());
             cours.setNbPlacesOccupees(newCours.getNbPlacesOccupees());
             return this.coursRepository.save(cours);
         })
                 .orElseGet(() -> {
-                    newCours.setId(id);
+                    newCours.setId(idCours);
                     return this.coursRepository.save(newCours);
                 });
     }
@@ -90,7 +91,7 @@ public class CoursController {
         this.coursRepository.deleteById(id);
     }
 
-    @DeleteMapping("/deleteAll")
+    @PostMapping("/deleteAll")
     public void deleteAll() {
         this.coursRepository.deleteAll();
     }
@@ -132,19 +133,7 @@ public class CoursController {
 
     @GetMapping("/getLieuById/{idLieu}")
     public Lieu getLieuById(@PathVariable String idLieu) throws Exception {
-        ArrayList<Lieu> listeLieux = getListeLieux();
-        Lieu res = null;
-        int i = 0;
-        while(res==null & i<listeLieux.size()) {
-            Lieu lieu  = listeLieux.get(i);
-            if(lieu.getId().equals(idLieu)) {
-                res = lieu;
-            }
-            i++;
-        }
-
-        if(res==null)
-            throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
+        Lieu res = getOneLieu(idLieu);
 
         return res;
     }
@@ -178,7 +167,7 @@ public class CoursController {
      * @return Cours
      * @throws Exception
      */
-    @GetMapping("/deleteSeance/{idCours}/{idSeance}")
+    @PostMapping("/deleteSeance/{idCours}/{idSeance}")
     public Cours deleteSeance(@PathVariable("idCours") String idCours, @PathVariable("idSeance") Integer idSeance) throws Exception {
         Cours cours = this.coursRepository.findCoursById(idCours);
         if(cours.getListeSeances().containsKey(idSeance))
@@ -222,7 +211,7 @@ public class CoursController {
         Calendar c = Calendar.getInstance();
         Date currentDate = new Date();
         c.setTime(currentDate);
-        c.add(Calendar.DAY_OF_MONTH, 7);
+        c.add(Calendar.DAY_OF_MONTH, 6);
 
         return c.getTime().before(Date
                 .from(date.atZone(ZoneId.systemDefault())
@@ -313,5 +302,22 @@ public class CoursController {
             }
         }
         return true;
+    }
+
+    public Lieu getOneLieu(String idLieu) throws Exception {
+        ArrayList<Lieu> listeLieux = getListeLieux();
+        Lieu res = null;
+        int i = 0;
+        while(res==null & i<listeLieux.size()) {
+            Lieu lieu  = listeLieux.get(i);
+            if(lieu.getId().equals(idLieu)) {
+                res = lieu;
+            }
+            i++;
+        }
+        if(res==null)
+            throw new Exception("Erreur : aucun lieu ne correspond a cet identifiant");
+
+        return res;
     }
 }
