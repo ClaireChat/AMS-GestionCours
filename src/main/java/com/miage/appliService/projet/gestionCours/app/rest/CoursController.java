@@ -96,7 +96,7 @@ public class CoursController {
         this.coursRepository.deleteAll();
     }
 
-    @GetMapping("/inscrireCours/{idCours}/{idMembre}")
+    @PostMapping("/inscrireCours/{idCours}/{idMembre}")
     public Cours inscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) throws Exception {
         log.info("inscrireCours/"+idCours+"/"+idMembre);
         Cours cours = this.coursRepository.findCoursById(idCours);
@@ -116,7 +116,7 @@ public class CoursController {
         return this.coursRepository.save(cours);
     }
 
-    @GetMapping("/desinscrireCours/{idCours}/{idMembre}")
+    @PostMapping("/desinscrireCours/{idCours}/{idMembre}")
     public Cours desinscrireCours(@PathVariable("idCours") String idCours, @PathVariable("idMembre") Long idMembre) {
         Cours cours = this.coursRepository.findCoursById(idCours);
         ArrayList<Long> listeMembres = cours.getListeMembres();
